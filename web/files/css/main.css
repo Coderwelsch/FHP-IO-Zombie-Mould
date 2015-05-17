@@ -1,0 +1,116 @@
+@import "jquery.nouislider.css";
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+html, body {
+	height: 100%;
+	width: 100%;
+
+	background-color: #81D4FA;
+}
+
+#loading-screen {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+
+	z-index: 1;
+
+	background-color: #FFF;
+
+	transition: transform 1s 2s ease-in-out;
+	-webkit-transition: transform 1s 2s ease-in-out;
+	-moz-transition: transform 1s 2s ease-in-out;
+}
+
+#loading-screen.hide {
+	transform: translateY( -100% );
+}
+
+#loading-screen #loading-box {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+
+	transform: translate( -50%, -50% );
+}
+
+#loading-screen .headline, #loading-screen .progress-label {
+	text-align: center;
+}
+
+#loading-screen .headline {
+	font-family: 'zombiea', sans-serif;
+	font-size: 50px;
+
+	color: #9D1B30;
+}
+
+#loading-screen .progress-label {
+	font-family: 'robotolight';
+
+	color: grey;
+}
+
+#google-map {
+	position: absolute;
+	top: 0;
+	left: 0;
+
+	z-index: 0;
+
+	height: 100%;
+	width: 100%;
+}
+
+#google-map {
+	background-color: #81D4FA;
+}
+
+
+/* font faces */
+@font-face {
+    font-family: 'zombiea';
+    src: url('../fonts/zombie-webfont.eot');
+    src: url('../fonts/zombie-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/zombie-webfont.woff2') format('woff2'),
+         url('../fonts/zombie-webfont.woff') format('woff'),
+         url('../fonts/zombie-webfont.ttf') format('truetype'),
+         url('../fonts/zombie-webfont.svg#zombiea') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'robotolight';
+    src: url('../fonts/roboto-light-webfont.eot');
+    src: url('../fonts/roboto-light-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/roboto-light-webfont.woff2') format('woff2'),
+         url('../fonts/roboto-light-webfont.woff') format('woff'),
+         url('../fonts/roboto-light-webfont.ttf') format('truetype'),
+         url('../fonts/roboto-light-webfont.svg#robotolight') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+
+
+@font-face {
+    font-family: 'robotoregular';
+    src: url('../fonts/roboto-regular-webfont.eot');
+    src: url('../fonts/roboto-regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/roboto-regular-webfont.woff2') format('woff2'),
+         url('../fonts/roboto-regular-webfont.woff') format('woff'),
+         url('../fonts/roboto-regular-webfont.ttf') format('truetype'),
+         url('../fonts/roboto-regular-webfont.svg#robotoregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
