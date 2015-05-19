@@ -4,8 +4,11 @@ var RESOLUTION_X = 640,
 
 var cvData = {},
     processedCVData = [],
-    visualizationData = [ [ 'Land', 'Infektionsrate' ] ],
+    visualisationHeader = [ [ 'Land', 'Infektionsrate' ] ],
+    visualizationData = visualisationHeader,
     visualizationArray = [],
+    urlCache = {},
+    geoChart,
     $map,
     $loadingScreen,
     $progressLabel;
@@ -36,7 +39,11 @@ function initVars () {
 function loadCVData () {
     $progressLabel.text( 'Analysiere die gemeldeten Infektionen...' );
 
-    $.getJSON( 'files/json/exported.json', cvDataLoaded );
+    $.getJSON( 'files/json/cachedURLs.json', function ( data ) {
+        urlCache = data;
+
+        $.getJSON( 'files/json/exported.json', cvDataLoaded );
+    } );
 }
 
 function cvDataLoaded ( data ) {
@@ -58,8 +65,8 @@ function initVisualisationMap () {
 
     $progressLabel.text( 'Infektionen: ' + infections + ', Betroffene Länder: ' + infectedCountries );
 
-    var chart = new google.visualization.GeoChart( $map[ 0 ] );
-    chart.draw( visualizationArray, {
+    geoChart = new google.visualization.GeoChart( $map[ 0 ] );
+    geoChart.draw( visualizationArray, {
         region: 'world',
         showZoomOut: true,
         showLegend: true,
@@ -69,6 +76,50 @@ function initVisualisationMap () {
     } );
 
     $loadingScreen.addClass( 'hide' );
+
+    initSlider();
+    saveNewURLJSON();
+}
+
+function saveNewURLJSON () {
+    $.post( 'files/php/saveJSON.php', { 'json': JSON.stringify( urlCache ) }, function( data ) {
+        console.log( 'PHP JSON Callback:' + data );
+    } );
+}
+
+function initSlider () {
+    $( '#slider' ).noUiSlider( {
+        start: [ 100 ],
+        step: 10,
+        range: {
+            'min': 0,
+            'max': 100
+        }
+    } );
+
+    $('#slider').on( {
+        set: updateVisualisation
+    } )
+}
+
+function updateVisualisation () {
+    var intervalIndex = parseInt( visualizationData.length * ( $( this ).val() / 100 ) ),
+        croppedData = [ [ 'Land', 'Infektionsrate' ] ];
+
+    for ( var i = 1; i < intervalIndex; i++ ) {
+        croppedData.push( visualizationData[ i ] );
+    }
+
+    croppedData = google.visualization.arrayToDataTable( croppedData );
+
+    geoChart.draw( croppedData, {
+        region: 'world',
+        showZoomOut: true,
+        showLegend: true,
+        colorAxis: { colors: [ '#FFD1D2', '#F21B1E', '#A60508' ] },
+        defaultColor: '#FFFFFF',
+        backgroundColor: '#81D4FA'
+    } );
 }
 
 function mapLatitute ( minA, maxA, a ) {
@@ -146,33 +197,45 @@ function prepareCVData () {
 
         item = cvData[ item ];
 
+        var url = 'http://api.geonames.org/countryCodeJSON?lat=' + mapLatitute( 0, RESOLUTION_Y, item[ 1 ] ) + '&lng=' + mapLongtitute( 0, RESOLUTION_X, item[ 0 ] ) + '&username=coderwelsch';
+
+        if ( urlCache[ url ] ) {
+            dataLoaded( urlCache[ url ] );
+
+            continue;
+        }
+
         $.ajax( {
-            url: '//api.geonames.org/countryCodeJSON?lat=' + mapLatitute( 0, RESOLUTION_Y, item[ 1 ] ) + '&lng=' + mapLongtitute( 0, RESOLUTION_X, item[ 0 ] ) + '&username=coderwelsch',
+            url: url,
             dataType: 'json',
-            success: function ( data ) {
-                var processedItem = {
-                    countryName: '',
-                    countryCode: '',
-                    lat: mapLatitute( 0, RESOLUTION_Y, item[ 1 ] ),
-                    lng: mapLongtitute( 0, RESOLUTION_X, item[ 0 ] )
-                };
-
-                if ( 'countryName' in data ) {
-                    processedItem.countryName = data.countryName;
-                    processedItem.countryCode = data.countryCode;
-
-                    processedCVData.push( processedItem );  
-                }
-
-                respondedRequests++;
-
-                $progressLabel.text( 'Verwerte geladene Daten ( ' + respondedRequests + ' / ' + requestsToFetch + ' )' );
-
-                if ( respondedRequests === requestsToFetch ) {
-                    createChartData();
-                }
-            }
+            success: dataLoaded
         } );
+
+        function dataLoaded ( data ) {
+            urlCache[ this.url ] = data;
+
+            var processedItem = {
+                countryName: '',
+                countryCode: '',
+                lat: mapLatitute( 0, RESOLUTION_Y, item[ 1 ] ),
+                lng: mapLongtitute( 0, RESOLUTION_X, item[ 0 ] )
+            };
+
+            if ( 'countryName' in data ) {
+                processedItem.countryName = data.countryName;
+                processedItem.countryCode = data.countryCode;
+
+                processedCVData.push( processedItem );  
+            }
+
+            respondedRequests++;
+
+            $progressLabel.text( 'Verwerte geladene Daten ( ' + respondedRequests + ' / ' + requestsToFetch + ' )' );
+
+            if ( respondedRequests === requestsToFetch ) {
+                createChartData();
+            }
+        }
     }
 }
 

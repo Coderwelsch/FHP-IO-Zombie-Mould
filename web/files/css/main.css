@@ -12,6 +12,19 @@ html, body {
 	background-color: #81D4FA;
 }
 
+#control-panel {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+
+	z-index: 10;
+
+	padding: 10px 20px;
+
+	background-color: #fff;
+}
+
 #loading-screen {
 	position: absolute;
 	top: 0;
