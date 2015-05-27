@@ -9,6 +9,12 @@ var cvData = {},
     visualizationArray = [],
     urlCache = {},
     geoChart,
+    boundingBoxCountry = {
+        north: 55.067486,
+        south: 47.270111,
+        east: 15.041896,
+        west: 5.866342
+    },
     $map,
     $loadingScreen,
     $progressLabel;
@@ -122,30 +128,46 @@ function updateVisualisation () {
     } );
 }
 
-function mapLatitute ( minA, maxA, a ) {
+function mapLatitute ( minA, maxA, a, mapBoundingBox ) {
     var min = 0;
     var max = 90;
     var range = max - min;
     var arange = maxA - minA;
 
-    var value = ( a / arange ) * range
+    var value = ( a / arange ) * range;
 
     value = value < min ? min : value;
     value = value > max ? max : value;
 
+    if ( mapBoundingBox ) {
+        // y
+        var min_ = mapBoundingBox.north,
+            max_ = mapBoundingBox.south;
+
+        value = ( ( value - min ) / ( max - min ) * ( max_ - min_ ) + min_ );
+    }
+
     return value;
 }
 
-function mapLongtitute ( minA, maxA, a ) {
+function mapLongtitute ( minA, maxA, a, mapBoundingBox ) {
     var min = 0;
     var max = 180;
     var range = max - min;
     var arange = maxA - minA;
 
-    var value = ( a / arange ) * range
+    var value = ( a / arange ) * range;
 
     value = value < min ? min : value;
     value = value > max ? max : value;
+
+    if ( mapBoundingBox ) {
+        // x
+        var min_ = mapBoundingBox.west,
+            max_ = mapBoundingBox.east;
+
+        value = ( ( value - min ) / ( max - min ) * ( max_ - min_ ) + min_ );
+    }
 
     return value;
 }
@@ -197,7 +219,7 @@ function prepareCVData () {
 
         item = cvData[ item ];
 
-        var url = 'http://api.geonames.org/countryCodeJSON?lat=' + mapLatitute( 0, RESOLUTION_Y, item[ 1 ] ) + '&lng=' + mapLongtitute( 0, RESOLUTION_X, item[ 0 ] ) + '&username=coderwelsch';
+        var url = 'http://api.geonames.org/countryCodeJSON?lat=' + mapLatitute( 0, RESOLUTION_Y, item[ 1 ], boundingBoxCountry ) + '&lng=' + mapLongtitute( 0, RESOLUTION_X, item[ 0 ], boundingBoxCountry ) + '&username=coderwelsch';
 
         if ( urlCache[ url ] ) {
             dataLoaded( urlCache[ url ] );
@@ -213,12 +235,14 @@ function prepareCVData () {
 
         function dataLoaded ( data ) {
             urlCache[ this.url ] = data;
+            urlCache[ this.url ][ 'lat' ] = $.urlParam( 'lat', this.url );
+            urlCache[ this.url ][ 'lng' ] = $.urlParam( 'lng', this.url );
 
             var processedItem = {
                 countryName: '',
                 countryCode: '',
-                lat: mapLatitute( 0, RESOLUTION_Y, item[ 1 ] ),
-                lng: mapLongtitute( 0, RESOLUTION_X, item[ 0 ] )
+                lat: urlCache[ this.url ][ 'lat' ],
+                lng: urlCache[ this.url ][ 'lng' ]
             };
 
             if ( 'countryName' in data ) {
@@ -238,6 +262,16 @@ function prepareCVData () {
         }
     }
 }
+
+$.urlParam = function( name, url ){
+    var results = new RegExp( '[\?&]' + name + '=([^&#]*)' ).exec( url );
+
+    if ( results == null ){
+        return null;
+    } else {
+        return results[ 1 ] || 0;
+    }
+};
 
 function init () {
     initVars();
