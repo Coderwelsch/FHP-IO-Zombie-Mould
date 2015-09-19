@@ -1,0 +1,73 @@
+@keyframes blink {
+	0% {
+		opacity: 0.5;
+	}
+
+	50% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0.5;
+	}
+}
+
+.teaser-view {
+	width: 100vw;
+	height: 100vh;
+
+	.teaser-text {
+		position: absolute;
+		right: 10px;
+		bottom: 10px;
+
+		width: 440px;
+
+		padding: 10px;
+
+		background-color: rgba(0, 0, 0, 0.5);
+
+		.biohazard {
+			width: 50px;
+			height: 46px;
+
+			float: left;
+			margin-right: 10px;
+			margin-bottom: 80px;
+
+			opacity: 0.5;
+
+			display: inline-block;
+
+			background-image: url(../assets/svg/biohazard.svg);
+			background-position: center center;
+			background-size: contain;
+			background-repeat: no-repeat; 
+
+			animation: blink 2s 1s linear infinite;
+		}
+
+		h2 {
+			font-family: 'zombiea';
+			font-size: 25px;
+			margin-bottom: 10px;
+			letter-spacing: 0.1em;
+			color: white;	
+		}
+
+		p {
+			font-family: Helvetica;
+			color: white;	
+		}
+	}
+
+	.bg-video {
+		width: 100%;
+		height: 100%;
+
+		video {
+			width: 100%;
+			height: 100%;			
+		}
+	}
+}

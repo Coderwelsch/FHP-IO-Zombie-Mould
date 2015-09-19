@@ -1,0 +1,60 @@
+// imports
+@import "_font-faces.scss";
+
+// global vars
+$color-dark-blood: #9e1b30;
+
+* {
+	margin: 0;
+	padding: 0;
+
+	cursor: default;
+
+	box-sizing: border-box;
+}
+  
+html, body {
+	background-color: black;
+
+	overflow: hidden;
+
+	> nav {
+		position: relative;
+
+		width: 100vw;
+		height: 100vh;
+
+		display: none;
+
+		&.active {
+			display: block;
+		}
+	}
+
+	> div {
+		position: relative;
+
+		width: 100vw;
+		height: 100vh;
+
+		display: block;
+
+		overflow: hidden;
+	}
+ 
+	h1 {
+		font-family: 'zombiea';  
+		font-size: 90px;
+		letter-spacing: 0.1em;
+		color: $color-dark-blood;
+		text-align: center;
+
+		text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+	}
+ 
+	@import "_navigation.scss";
+	@import "views/_loading-overlay.scss";
+	@import "views/_teaser.scss";
+	@import "views/_history.scss";
+	@import "views/_infection-map.scss";
+}

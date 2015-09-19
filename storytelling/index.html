@@ -1,0 +1,52 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="files/css/main.css">
+
+		<script src="files/js/require.js" data-main="files/js/main"></script>
+	</head>
+
+	<body>
+		<div class="main-loading-overlay-view view active">
+			<div>
+				<h1>Zombie</h1>
+			</div>
+			<div>
+				<h1>Mould</h1>
+			</div>
+		</div>
+
+		<nav class="navigation active">
+			<div class="mute-btn"></div>
+			<h1 class="page-pos-headline">Start</h1>
+			<ul>
+				<li><a href="#start">Start</a></li>
+				<li><a href="#history">Was ist geschehen?</a></li>
+				<li><a href="#infection-map">Die Ausbreitung</a></li>
+			</ul>
+		</nav>
+
+		<div id="start" class="teaser-view view">
+			<div id="start" class="teaser-text">
+				<div class="biohazard"></div>
+				<h2>Der Untergang der Menschheit...</h2>	
+				<p>... war seit Anbeginn dessen vorher&shy;bestimmt. Sie ver&shy;nichtet sich selbst. Durch Natur&shy;kata&shy;strophen? Durch Atom&shy;bomben? Nein! Durch etwas wesentlich schlimmeres!</p>
+			</div>
+
+			<div class="bg-video">
+				<video src="files/videos/teaser.mp4" muted autoplay loop></video>
+				<audio src="files/sounds/28-weeks-later-theme-song.mp3" class="sound-main-theme" autoplay></audio>
+			</div>
+		</div>
+
+		<div id="history" class="history-view view">
+			<img src="files/assets/jpg/history-1.jpg" alt="">
+			<img src="files/assets/jpg/history-2.jpg" alt="">
+			<img src="files/assets/jpg/history-3.jpg" alt="">
+			<img src="files/assets/jpg/history-4.jpg" alt="">
+		</div>
+
+		<div id="infection-map" class="infection-map view">
+			<iframe src="infection-map/index.html" frameborder="0"></iframe>
+		</div>
+	</body>
+</html>

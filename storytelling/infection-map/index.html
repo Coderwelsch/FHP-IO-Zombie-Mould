@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta charset="UTF-8">
+
+        <title>Zombie Mould - Eingabe / Ausgabe</title>
+
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+
+                box-sizing: border-box;
+                -webkit-box-sizing: border-box;
+            }
+
+            html, body, #google-map {
+                width: 100%;
+                height: 100%;
+            }
+
+            #loading-screen {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+
+                z-index: 10;
+
+                background-color: #FFF;
+
+                transition: transform 1s 2s ease-in-out;
+                -webkit-transition: transform 1s 2s ease-in-out;
+                -moz-transition: transform 1s 2s ease-in-out;
+            }
+
+            #loading-screen.hide {
+                transform: translateY( -100% );
+            }
+
+            #loading-screen #loading-box {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+
+                transform: translate( -50%, -50% );
+            }
+
+            #loading-screen .headline, #loading-screen .progress-label {
+                text-align: center;
+            }
+
+            #loading-screen .headline {
+                font-family: 'zombiea', sans-serif;
+                font-size: 50px;
+
+                color: #9D1B30;
+            }
+
+            #loading-screen .progress-label {
+                font-family: 'robotolight';
+
+                color: grey;
+            }
+
+            #controls {
+                position: absolute;
+                right: 0;
+                bottom: 0;
+
+                z-index: 5;
+
+                width: 100px;
+                height: 50px;
+
+                background-color: rgba(255, 255, 255, 0.9);
+            }
+
+            #controls div {
+                width: 50%;
+                height: 100%;
+
+                opacity: 0.5;
+
+                display: inline-block;
+
+                cursor: pointer;
+                
+                background-size: 30px 30px;
+                background-position: center center;
+                background-repeat: no-repeat;
+            }
+
+            #controls div:hover {
+                opacity: 1;
+            }
+
+            #controls div.label {
+                position: absolute;
+                top: -50%;
+
+                width: 100%;
+
+                pointer-events: none;
+
+                text-align: center;
+                font-family: 'robotolight';
+                color: grey;
+            }
+
+            #controls div.minus {
+                border-right: 1px solid lightgrey;
+
+                background-image: url(files/svg/calculation.svg);
+            }
+
+            #controls div.plus {
+                background-image: url(files/svg/add186.svg);   
+            }
+
+            @font-face {
+                font-family: 'zombiea';
+                src: url('files/fonts/zombie-webfont.eot');
+                src: url('files/fonts/zombie-webfont.eot?#iefix') format('embedded-opentype'),
+                     url('files/fonts/zombie-webfont.woff2') format('woff2'),
+                     url('files/fonts/zombie-webfont.woff') format('woff'),
+                     url('files/fonts/zombie-webfont.ttf') format('truetype'),
+                     url('files/fonts/zombie-webfont.svg#zombiea') format('svg');
+                font-weight: normal;
+                font-style: normal;
+            }
+
+            @font-face {
+                font-family: 'robotolight';
+                src: url('files/fonts/roboto-light-webfont.eot');
+                src: url('files/fonts/roboto-light-webfont.eot?#iefix') format('embedded-opentype'),
+                     url('files/fonts/roboto-light-webfont.woff2') format('woff2'),
+                     url('files/fonts/roboto-light-webfont.woff') format('woff'),
+                     url('files/fonts/roboto-light-webfont.ttf') format('truetype'),
+                     url('files/fonts/roboto-light-webfont.svg#robotolight') format('svg');
+                font-weight: normal;
+                font-style: normal;
+
+            }
+
+            @font-face {
+                font-family: 'robotoregular';
+                src: url('files/fonts/roboto-regular-webfont.eot');
+                src: url('files/fonts/roboto-regular-webfont.eot?#iefix') format('embedded-opentype'),
+                     url('files/fonts/roboto-regular-webfont.woff2') format('woff2'),
+                     url('files/fonts/roboto-regular-webfont.woff') format('woff'),
+                     url('files/fonts/roboto-regular-webfont.ttf') format('truetype'),
+                     url('files/fonts/roboto-regular-webfont.svg#robotoregular') format('svg');
+                font-weight: normal;
+                font-style: normal;
+
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="loading-screen">
+            <div id="loading-box">
+                <h1 class="headline">ZOMBIE MOULD</h1>
+                <p class="progress-label">Bitte warten...</p>
+            </div>
+        </div>
+
+        <div id="controls">
+            <div class="label">Tag <span class="day">0</span></div>
+            <div class="minus"></div><!-- 
+             --><div class="plus"></div>
+        </div>
+
+        <div id="google-map"></div>
+
+
+        <!-- scripts -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script type="text/javascript" src="http://plugins.coderwelsch.com/com.cw.GoogleMap.js"></script>
+        <script type="text/javascript" src="files/js/markerclusterer.min.js"></script>
+
+        <script type="text/javascript">
+            var cities = {
+                    'Berlin': { lat: 52.520007, lng: 13.404954 },
+                    'Hamburg': { lat: 53.551085, lng: 9.993682 },
+                    'Hannover': { lat: 52.375892, lng: 9.732010 },
+                    'Bremen': { lat: 53.079296, lng: 8.801694 },
+                    'Düsseldorf': { lat: 51.227741, lng: 6.773456 },
+                    'Leipzig': { lat: 51.339695, lng: 12.373075 },
+                    'München': { lat: 48.135125, lng: 11.581981 },
+                    'Köln': { lat: 50.937531, lng: 6.960279 },
+                    'Frankfurt am Main': { lat: 50.110922, lng: 8.682127 }
+                },
+                boundingBoxCountry = {
+                    north: 55.067486,
+                    south: 47.270111,
+                    east: 15.041896,
+                    west: 5.866342
+                },
+
+                iconURL = "files/imgs/oat_flake.png";
+                circles = [],
+                jsonData = {},
+                dataIndexView = 0,
+
+                _gMap = new com.cw.GoogleMap( {
+                    $container: $( '#google-map' ),
+                    mapSettings: {
+                        zoom: 6,
+                        center: { lat: 51.165691, lng: 10.451526 },
+                        styles: [{"featureType":"all","elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#000000"},{"lightness":40}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#000000"},{"lightness":16}]},{"featureType":"all","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":17},{"weight":1.2}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":21}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":17}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":29},{"weight":0.2}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":16}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":19}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":17}]}]
+                    },
+
+                    onMapLoaded: mapLoaded
+                } );
+
+            function displayCities () {
+                var markers = [];
+                for ( var key in cities ) {
+                    var item = cities[ key ],
+                        marker = new google.maps.Marker({
+                            position: item,
+                            map: _gMap.googleMap,
+                            title: key,
+                            icon: {
+                                url: iconURL,
+                                origin: new google.maps.Point( 0, 0 ),
+                                anchor: new google.maps.Point( 35, 35 ),
+                                size: new google.maps.Size( 70, 70 ),
+                                scaledSize: new google.maps.Size( 70, 70 )
+                            }
+                        } ),
+                        infoWindow = new google.maps.InfoWindow( {
+                            content: '<h3>' + key + '</h3>'
+                        } );
+
+                    marker.content = '<h3>' + key + '</h3>';
+
+                    google.maps.event.addListener( marker, 'click', function() {
+                        infoWindow.setContent( this.content );
+                        infoWindow.open( _gMap.googleMap, this );
+                    });
+
+                    markers.push( marker );
+                }
+            }
+
+            function bindEvents () {
+                $( '#controls .minus' ).on( 'click', function () {
+                    dataIndexView--;
+
+                    if ( jsonData[ dataIndexView ] ) {
+                        drawCircles();
+                    } else {
+                        dataIndexView = 42;
+                    }
+
+                    updateDayLabel();
+                } );
+
+                $( '#controls .plus' ).on( 'click', function () {
+                    dataIndexView++;
+
+                    if ( jsonData[ dataIndexView ] ) {
+                        drawCircles();
+                    } else {
+                        dataIndexView = 0;
+                    }
+
+                    updateDayLabel();
+                } );
+            }
+
+            function updateDayLabel () {
+                $( '#controls .label .day' ).text( dataIndexView );
+            }
+
+            function drawCircles () {
+                var c = [],
+                    index = 0;
+
+                //for ( var key in jsonData ) {
+                    for ( var i = 0; i < jsonData[ dataIndexView ].length; i+=30 ) {
+                        if ( circles[ index ] ) {
+                            circles[ index ].setMap( null );
+                        }
+
+                        index++;
+
+                        var item = jsonData[ dataIndexView ][ i ],
+                            pos = { 
+                                lat: mapLatitute( 0, 608, item[ 0 ], boundingBoxCountry ), 
+                                lng: mapLongtitute( 0, 1080, item[ 1 ], boundingBoxCountry ) 
+                            };
+
+                        var populationOptions = {
+                                strokeColor: '#FF0000',
+                                strokeOpacity: 0.8,
+                                strokeWeight: 2,
+                                fillColor: '#FF0000',
+                                fillOpacity: 0.35,
+                                map: _gMap.googleMap,
+                                center: pos,
+                                radius: 7000
+                            },
+                            cityCircle = new google.maps.Circle( populationOptions );
+
+                        c.push( cityCircle );
+                    }
+                //}
+
+                circles = c;
+            }
+
+            function mapLoaded () {
+                bindEvents();
+                displayCities();
+
+                $.getJSON( 'files/json/exportedv2.json', function ( data ) {
+                    jsonData = data;
+
+                    $( '#loading-screen' ).addClass( 'hide' );
+                    
+                    console.log(jsonData);
+
+                    drawCircles();
+
+                /*  var markers = [];
+
+                    var markers = [];
+
+                    for ( var key in data ) {
+                        var item = data[ key ],
+                            marker = new google.maps.Marker( {
+                                position: { lat: parseFloat( item.lat ), lng: parseFloat( item.lng ) },
+                                map: _gMap.googleMap,
+                                title: 'Hello World!'
+                            } );
+
+                        markers.push( marker );
+                    }
+
+                    if ( getURLParameter( window.location.href, 'cluster' ) !== 'false' ) {
+                        var cluster = new MarkerClusterer( _gMap.googleMap, markers, {} ),
+                            clusterMarkers = cluster.getMarkers();
+
+                        for ( var i = 0; i < 20 - 1; i++ ) {
+                            var marker1 = clusterMarkers[ i ],
+                                marker2 = clusterMarkers[ i + 1 ];
+
+                            if ( marker1 && marker2 ) {
+                                var path = new google.maps.Polyline( {
+                                    path: [ marker1.getPosition(), marker2.getPosition() ],
+                                    geodesic: true,
+                                    strokeColor: '#FF0000',
+                                    strokeOpacity: 0.5,
+                                    strokeWeight: 3
+                                } );
+
+                                path.setMap( _gMap.googleMap );
+                            }
+                        }
+                    } else {
+                    }*/
+                } );
+            }
+
+            function getURLParameter ( url, name ) {
+                return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec( url )||[,""])[1].replace(/\+/g, '%20'))||null
+            }
+
+            function mapLatitute ( minA, maxA, a, mapBoundingBox ) {
+                var min = 0;
+                var max = 90;
+                var range = max - min;
+                var arange = maxA - minA;
+
+                var value = ( a / arange ) * range;
+
+                value = value < min ? min : value;
+                value = value > max ? max : value;
+
+                if ( mapBoundingBox ) {
+                    // y
+                    var min_ = mapBoundingBox.north,
+                        max_ = mapBoundingBox.south;
+
+                    value = ( ( value - min ) / ( max - min ) * ( max_ - min_ ) + min_ );
+                }
+
+                return value;
+            }
+
+            function mapLongtitute ( minA, maxA, a, mapBoundingBox ) {
+                var min = 0;
+                var max = 180;
+                var range = max - min;
+                var arange = maxA - minA;
+
+                var value = ( a / arange ) * range;
+
+                value = value < min ? min : value;
+                value = value > max ? max : value;
+
+                if ( mapBoundingBox ) {
+                    // x
+                    var min_ = mapBoundingBox.west,
+                        max_ = mapBoundingBox.east;
+
+                    value = ( ( value - min ) / ( max - min ) * ( max_ - min_ ) + min_ );
+                }
+
+                return value;
+            }
+        </script>
+    </body>
+</html>
